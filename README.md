@@ -1,16 +1,14 @@
 # Minimum Viable Factory
 
-What if you could write a Linear ticket and have working code deployed by the time you finish lunch?
-
-That's what this does. Six Claude Code agents pass a ticket through spec, architecture, code, review, tests, and deploy. You approve at three Slack gates. One orchestrator file runs the whole thing.
+Ticket in, deployed web app out. The full SDLC — spec, architecture, code, review, tests, deploy — handled by six Claude Code agents. You approve at three gates. One orchestrator file runs the whole thing.
 
 **~500 lines of Python. 6 skills. 4 MCPs. You can read every file in one sitting.**
 
-Right now this factory greenfields web apps — you describe an idea, and it builds and deploys the whole thing from scratch. Brownfield support (working in existing codebases, adding features, fixing bugs) is next.
+Right now this factory greenfields web apps from idea to production. You describe what you want, agents build and deploy it from scratch. Brownfield support (existing codebases, new features, bug fixes) is next.
 
 ## The 11 Primitives Every Software Factory Needs
 
-We tried to figure out the smallest set of building blocks that turns "ticket in" to "deployed app out." Here's what we landed on:
+We tried to figure out the smallest set of building blocks that turns a ticket into a deployed app. Every factory needs these — the specific tools are up to you:
 
 | # | Primitive | What It Does | This Factory Uses |
 |---|---|---|---|
@@ -31,11 +29,11 @@ Swap any of these out. Use Jira instead of Linear. Deploy to Vercel instead of R
 ## How It Works
 
 ```
-Linear ticket created
+Ticket created (Linear in this implementation)
         |
 Webhook fires --> orchestrator.py
         |
-PM Agent writes spec --> memory/LIN-xxx.md
+PM Agent writes spec --> memory file
         |
 [GATE 1] Slack: "Spec ready. Move to In Arch to approve."
         |
