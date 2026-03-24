@@ -27,9 +27,9 @@ Each agent session loads one skill file from `.claude/skills/`:
 
 | Skill | Agent | Purpose |
 |-------|-------|---------|
-| `spec-writing.md` | PM Agent | Turn a raw ticket into a structured spec |
-| `architecture.md` | Architect Agent | Produce a technical architecture decision |
-| `coding.md` | Dev Agent | Write code, open a PR |
-| `code-review.md` | Review Agent | Review the PR for correctness and security |
-| `test-writing.md` | Test Agent | Write and run tests |
-| `deploy-checklist.md` | Deploy Agent | Deploy to Railway and verify |
+| `spec-writing/SKILL.md` | PM Agent | Turn a raw ticket into a structured spec |
+| `architecture/SKILL.md` | Architect Agent | Produce a technical architecture decision |
+| `coding/SKILL.md` | Dev Agent | Write code, open a PR |
+| `code-review/SKILL.md` | Review Agent | Review the PR for correctness and security |
+| `test-writing/SKILL.md` | Test Agent | Write and run tests |
+| `deploy-checklist/SKILL.md` | Deploy Agent | Deploy to Railway and verify |

@@ -29,12 +29,12 @@ A self-running software factory. You create a Linear ticket. Agents handle every
     CLAUDE.md              ← master context loaded by every Claude Code session
     settings.json           ← MCP server configuration for all agent sessions
     skills/
-      spec-writing.md
-      architecture.md
-      coding.md
-      code-review.md
-      test-writing.md
-      deploy-checklist.md
+      spec-writing/SKILL.md
+      architecture/SKILL.md
+      coding/SKILL.md
+      code-review/SKILL.md
+      test-writing/SKILL.md
+      deploy-checklist/SKILL.md
   audit/
     YYYY-MM-DD.log         ← one log file per day, every factory event
   app/                     ← the web app being built lives here

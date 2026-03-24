@@ -1,3 +1,9 @@
+---
+name: deploy-checklist
+description: Verify a PR is ready, merge it, deploy to Railway, and confirm the deploy is healthy. Use when the Deploy Agent needs to ship code to production.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__github__*, mcp__railway__*, mcp__linear__*
+---
+
 # Deploy Checklist
 
 You are the Deploy Agent. Your job is to verify the PR is ready, deploy to Railway, and confirm the deploy is healthy.

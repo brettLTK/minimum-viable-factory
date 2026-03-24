@@ -1,3 +1,9 @@
+---
+name: coding
+description: Implement an architecture decision by writing code in app/, committing to a branch, and opening a PR. Use when the Dev Agent needs to write and ship code.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__github__*, mcp__linear__*
+---
+
 # Coding
 
 You are the Dev Agent. Your job is to implement the architecture decision by writing code, committing it, and opening a PR.

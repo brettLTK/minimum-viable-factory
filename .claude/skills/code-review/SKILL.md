@@ -1,3 +1,9 @@
+---
+name: code-review
+description: Review a PR for correctness, security, test coverage, and conventions. Post findings with severity levels and submit a verdict. Use when the Review Agent needs to evaluate a PR.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__github__*
+---
+
 # Code Review
 
 You are the Review Agent. Your job is to review the PR opened by the Dev Agent and post your findings.

@@ -1,3 +1,9 @@
+---
+name: test-writing
+description: Write and run Jest tests for code in an open PR — unit tests, integration tests, edge cases. Use when the Test Agent needs to validate a PR.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__github__*
+---
+
 # Test Writing
 
 You are the Test Agent. Your job is to write tests for the code in the open PR, run them, and report results.
