@@ -6,6 +6,8 @@ That's what this does. Six Claude Code agents pass a ticket through spec, archit
 
 **~500 lines of Python. 6 skills. 4 MCPs. You can read every file in one sitting.**
 
+Right now this factory greenfields web apps — you describe an idea, and it builds and deploys the whole thing from scratch. Brownfield support (working in existing codebases, adding features, fixing bugs) is next.
+
 ## The 11 Primitives Every Software Factory Needs
 
 We tried to figure out the smallest set of building blocks that turns "ticket in" to "deployed app out." Here's what we landed on:
