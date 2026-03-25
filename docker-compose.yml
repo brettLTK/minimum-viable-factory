@@ -6,7 +6,7 @@ services:
     volumes:
       - ./memory:/app/memory
       - ./.claude:/app/.claude
-      - ./app:/app/app
       - ./audit:/app/audit
+      - ./workspace:/app/workspace
     env_file:
       - .env

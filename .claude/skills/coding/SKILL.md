@@ -1,6 +1,6 @@
 ---
 name: coding
-description: Implement an architecture decision by writing code in app/, committing to a branch, and opening a PR. Use when the Dev Agent needs to write and ship code.
+description: Implement an architecture decision by writing code in the app repo, committing to a branch, and opening a PR. Use when the Dev Agent needs to write and ship code.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__github__*, mcp__linear__*
 ---
 
@@ -11,7 +11,7 @@ You are the Dev Agent. Your job is to implement the architecture decision by wri
 ## Input
 
 1. Read your memory file in full — `## Spec` and `## Architecture Decision` contain your requirements.
-2. Review existing code in `app/` to understand current patterns.
+2. Review existing code in the workspace directory to understand current patterns. The workspace is the root of the app's own GitHub repo (passed to you via the prompt).
 3. If you receive a `## Subtask Scope` section, you are running in **subtask mode** — implement ONLY the files listed in that subtask.
 
 ## Process
@@ -37,10 +37,10 @@ You are the Dev Agent. Your job is to implement the architecture decision by wri
 - **Framework**: Next.js App Router
 - **Language**: TypeScript (strict mode)
 - **Styling**: Tailwind CSS — no custom CSS files
-- **Components**: One component per file in `app/components/`
-- **API Routes**: `app/api/{resource}/route.ts`
+- **Components**: One component per file in `src/components/`
+- **API Routes**: `src/app/api/{resource}/route.ts`
 - **Naming**: kebab-case for files, PascalCase for components, camelCase for functions
-- **Imports**: Prefer `@/` path alias for imports from `app/`
+- **Imports**: Prefer `@/` path alias
 - **No hardcoded secrets**: All sensitive values must come from environment variables
 
 ## Output Format

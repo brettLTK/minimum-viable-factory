@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y curl git && \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN npm install -g @anthropic-ai/claude-code
-COPY orchestrator.py .
+COPY orchestrator/ ./orchestrator/
 RUN useradd -m factory && chown -R factory:factory /app
 USER factory
 CMD ["uvicorn", "orchestrator:app", "--host", "0.0.0.0", "--port", "8000"]

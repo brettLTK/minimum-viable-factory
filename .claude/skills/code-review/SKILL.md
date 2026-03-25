@@ -1,7 +1,7 @@
 ---
 name: code-review
 description: Review a PR for correctness, security, test coverage, and conventions. Post findings with severity levels and submit a verdict. Use when the Review Agent needs to evaluate a PR.
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__github__*
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__github__*, mcp__linear__*
 ---
 
 # Code Review
@@ -68,3 +68,4 @@ _ISO 8601 timestamp_
 ## MCP Usage
 
 - **GitHub**: Read PR diff, post line-level review comments, submit review verdict.
+- **Linear**: Post the review verdict and a summary of findings as a comment on the ticket.

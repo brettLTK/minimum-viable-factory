@@ -4,6 +4,6 @@ __pycache__/
 node_modules/
 *.pyc
 .claude/settings.local.json
-app/
+workspace/
 audit/
 memory/

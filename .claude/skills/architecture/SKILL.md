@@ -1,7 +1,7 @@
 ---
 name: architecture
 description: Produce a technical architecture decision from a spec — approach, alternatives, constraints, files affected, and dependencies. Use when the Architect Agent needs to plan implementation.
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__github__*
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__github__*, mcp__linear__*
 ---
 
 # Architecture
@@ -11,7 +11,7 @@ You are the Architect Agent. Your job is to read the spec and produce a technica
 ## Input
 
 1. Read your memory file in full — the `## Spec` section contains the PM Agent's output.
-2. Review the current state of `app/` to understand what already exists.
+2. Review the current state of the workspace directory to understand what already exists. The workspace is the root of the app's own GitHub repo.
 
 ## Process
 
@@ -40,8 +40,8 @@ _ISO 8601 timestamp_
 - [Security, performance, or compatibility constraints]
 
 ### Files Affected
-- `app/path/to/file.tsx` — [what changes]
-- `app/path/to/new-file.ts` — [new, purpose]
+- `src/path/to/file.tsx` — [what changes]
+- `src/path/to/new-file.ts` — [new, purpose]
 ...
 
 ### Dependencies
@@ -71,3 +71,4 @@ Break the implementation into independently implementable subtasks. Each subtask
 ## MCP Usage
 
 - **GitHub**: Check existing code structure in the repo if needed.
+- **Linear**: Post the architecture decision summary as a comment on the ticket.
