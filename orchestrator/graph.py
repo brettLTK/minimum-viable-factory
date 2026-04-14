@@ -16,6 +16,11 @@ from orchestrator.nodes import (
     deploy_agent,
     done_handler,
     blocked_handler,
+    prototype_flow_entry,
+    prototype_generator_fanout,
+    prototype_eval_gate,
+    prototype_selection_gate,
+    graduation_trigger,
 )
 
 
@@ -23,6 +28,26 @@ def should_block(state: FactoryState) -> str:
     if state.get("error") or state.get("current_state") == "Blocked":
         return "blocked_handler"
     return "continue"
+
+
+def route_flow_type(state: FactoryState) -> str:
+    """Deterministic routing based on PM agent classification. No LLM involved."""
+    if state.get("error") or state.get("current_state") == "Blocked":
+        return "blocked_handler"
+    flow_type = state.get("flow_type", "prototype")
+    if flow_type == "direct_sdlc":
+        return "direct_sdlc"
+    return "prototype"
+
+
+def route_graduation(state: FactoryState) -> str:
+    """Deterministic routing based on prototype winner. No LLM involved."""
+    if state.get("error") or state.get("current_state") == "Blocked":
+        return "blocked_handler"
+    winner = state.get("prototype_winner", "")
+    if not winner or winner == "Archived":
+        return "archive"
+    return "graduation"
 
 
 def qa_fanout(state: FactoryState) -> list[str]:
@@ -35,6 +60,13 @@ def qa_fanout(state: FactoryState) -> list[str]:
 def build_graph() -> StateGraph:
     """Construct the pipeline graph (uncompiled — caller adds checkpointer)."""
     builder = StateGraph(FactoryState)
+
+    # Prototype flow nodes (GH #362)
+    builder.add_node("prototype_flow_entry", prototype_flow_entry)
+    builder.add_node("prototype_generator_fanout", prototype_generator_fanout)
+    builder.add_node("prototype_eval_gate", prototype_eval_gate)
+    builder.add_node("prototype_selection_gate", prototype_selection_gate)
+    builder.add_node("graduation_trigger", graduation_trigger)
 
     # Nodes
     builder.add_node("pm_agent", pm_agent)
@@ -49,6 +81,33 @@ def build_graph() -> StateGraph:
     builder.add_node("deploy_agent", deploy_agent)
     builder.add_node("done_handler", done_handler)
     builder.add_node("blocked_handler", blocked_handler)
+
+    # Prototype flow edges (GH #362)
+    builder.add_conditional_edges(
+        "prototype_flow_entry",
+        route_flow_type,
+        {
+            "direct_sdlc": "pm_agent",
+            "prototype": "prototype_generator_fanout",
+            "blocked_handler": "blocked_handler",
+        },
+    )
+    builder.add_conditional_edges(
+        "prototype_generator_fanout",
+        should_block,
+        {"blocked_handler": "blocked_handler", "continue": "prototype_eval_gate"},
+    )
+    builder.add_edge("prototype_eval_gate", "prototype_selection_gate")
+    builder.add_conditional_edges(
+        "prototype_selection_gate",
+        route_graduation,
+        {
+            "graduation": "graduation_trigger",
+            "archive": "done_handler",
+            "blocked_handler": "blocked_handler",
+        },
+    )
+    builder.add_edge("graduation_trigger", "done_handler")
 
     # Edges: Spec → Gate 1 → Arch → Gate 2 → Decompose → Parallel Dev → QA → Gate 3 → Deploy
     builder.set_entry_point("pm_agent")

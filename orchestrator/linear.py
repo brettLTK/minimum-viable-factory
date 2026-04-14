@@ -28,11 +28,14 @@ AGENT_STAGES = [
 
 
 @traceable(run_type="tool", name="linear_gql")
-async def _linear_gql(query: str) -> dict:
+async def _linear_gql(query: str, variables: dict | None = None) -> dict:
+    payload: dict = {"query": query}
+    if variables:
+        payload["variables"] = variables
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             LINEAR_GQL,
-            json={"query": query},
+            json=payload,
             headers={"Authorization": LINEAR_API_KEY},
         )
     return resp.json() if resp.status_code == 200 else {}
@@ -101,15 +104,13 @@ async def create_sub_issue(
     parent_id: str, team_id: str, title: str, description: str
 ) -> str | None:
     """Create a Linear sub-issue under a parent. Returns the new issue identifier."""
-    safe_title = title.replace('"', '\\"')
-    safe_desc = description.replace('"', '\\"').replace("\n", "\\n")
     query = (
-        'mutation { issueCreate(input: { '
-        'parentId: "%s", teamId: "%s", title: "%s", description: "%s" '
-        '}) { success issue { id identifier } } }'
-        % (parent_id, team_id, safe_title, safe_desc)
+        "mutation IssueCreate($parentId: String!, $teamId: String!, $title: String!, $description: String!) {"
+        " issueCreate(input: { parentId: $parentId, teamId: $teamId, title: $title, description: $description })"
+        " { success issue { id identifier } } }"
     )
-    data = await _linear_gql(query)
+    variables = {"parentId": parent_id, "teamId": team_id, "title": title, "description": description}
+    data = await _linear_gql(query, variables=variables)
     issue = data.get("data", {}).get("issueCreate", {}).get("issue", {})
     return issue.get("identifier")
 
@@ -117,11 +118,11 @@ async def create_sub_issue(
 @traceable(run_type="tool", name="linear_comment")
 async def comment_on_issue(issue_id: str, body: str) -> None:
     """Post a comment on a Linear issue."""
-    safe_body = body.replace('"', '\\"').replace("\n", "\\n")
-    await _linear_gql(
-        'mutation { commentCreate(input: { issueId: "%s", body: "%s" }) { success } }'
-        % (issue_id, safe_body)
+    query = (
+        "mutation CommentCreate($issueId: String!, $body: String!) {"
+        " commentCreate(input: { issueId: $issueId, body: $body }) { success } }"
     )
+    await _linear_gql(query, variables={"issueId": issue_id, "body": body})
 
 
 # ---------------------------------------------------------------------------
@@ -206,6 +207,73 @@ async def complete_stage_sub_issue(ticket_id: str, stage_name: str, sub_issue_id
         )
 
     audit_log(ticket_id, "stage_complete", f"{stage_name} ({sub_issue_id})")
+
+
+@traceable(run_type="tool", name="linear_create_issue")
+async def create_linear_issue(
+    title: str,
+    description: str,
+    parent_id: str | None = None,
+    initial_state: str = "In Spec",
+    team_id: str | None = None,
+) -> str:
+    """Create a new Linear issue for graduation task spawning.
+
+    Returns the new issue identifier (e.g. 'LIN-99').
+    Raises RuntimeError on failure.
+    """
+    # Resolve state UUID
+    state_uuid = await _get_state_id(initial_state)
+    if not state_uuid:
+        raise RuntimeError(f"create_linear_issue: state '{initial_state}' not found in Linear")
+
+    # Resolve team_id from parent if not provided
+    resolved_team_id = team_id
+    if not resolved_team_id and parent_id:
+        parent_number = parent_id.replace("LIN-", "")
+        data = await _linear_gql(
+            '{ issues(filter: { number: { eq: %s } }) { nodes { team { id } } } }' % parent_number
+        )
+        nodes = data.get("data", {}).get("issues", {}).get("nodes", [])
+        if nodes:
+            resolved_team_id = nodes[0].get("team", {}).get("id", "")
+
+    if not resolved_team_id:
+        raise RuntimeError("create_linear_issue: could not resolve team_id")
+
+    # Resolve parent issue UUID if parent_id is a ticket identifier (LIN-xx)
+    parent_uuid: str | None = None
+    if parent_id:
+        parent_number = parent_id.replace("LIN-", "")
+        data = await _linear_gql(
+            '{ issues(filter: { number: { eq: %s } }) { nodes { id } } }' % parent_number
+        )
+        nodes = data.get("data", {}).get("issues", {}).get("nodes", [])
+        parent_uuid = nodes[0]["id"] if nodes else None
+
+    if parent_uuid:
+        query = (
+            "mutation IssueCreate($parentId: String!, $teamId: String!, $title: String!, $description: String!, $stateId: String!) {"
+            " issueCreate(input: { parentId: $parentId, teamId: $teamId, title: $title, description: $description, stateId: $stateId })"
+            " { success issue { id identifier } } }"
+        )
+        variables: dict = {"parentId": parent_uuid, "teamId": resolved_team_id, "title": title, "description": description, "stateId": state_uuid}
+    else:
+        query = (
+            "mutation IssueCreate($teamId: String!, $title: String!, $description: String!, $stateId: String!) {"
+            " issueCreate(input: { teamId: $teamId, title: $title, description: $description, stateId: $stateId })"
+            " { success issue { id identifier } } }"
+        )
+        variables = {"teamId": resolved_team_id, "title": title, "description": description, "stateId": state_uuid}
+    data = await _linear_gql(query, variables=variables)
+    result = data.get("data", {}).get("issueCreate", {})
+    if not result.get("success"):
+        raise RuntimeError(f"create_linear_issue: issueCreate mutation failed — {data}")
+    identifier = result.get("issue", {}).get("identifier", "")
+    if not identifier:
+        raise RuntimeError(f"create_linear_issue: no identifier returned — {data}")
+    audit_log(parent_id or "unknown", "linear_issue_created", f"{identifier} state={initial_state}")
+    return identifier
 
 
 @traceable(run_type="tool", name="update_stage_progress")

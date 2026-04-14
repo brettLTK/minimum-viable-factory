@@ -7,6 +7,7 @@ services:
       - ./memory:/app/memory
       - ./.claude:/app/.claude
       - ./audit:/app/audit
+      - ./db:/app/db
       - ./workspace:/app/workspace
     env_file:
       - .env

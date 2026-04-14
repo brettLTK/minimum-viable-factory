@@ -6,11 +6,11 @@ import re
 from langsmith import traceable
 from langgraph.types import Command
 
-from orchestrator.config import AGENT_TIMEOUT, GITHUB_ORG, WORKSPACE_DIR, logger
+from orchestrator.config import AGENT_TIMEOUT, GITHUB_ORG, GITHUB_BUILDS_REPO, WORKSPACE_DIR, logger
 from orchestrator.state import FactoryState
 from orchestrator.audit import audit_log
 from orchestrator.memory import append_memory
-from orchestrator.slack import post_slack
+from orchestrator.discord_notify import post_discord as post_slack
 from orchestrator.linear import (
     update_linear_state,
     ensure_stage_sub_issues,
@@ -40,8 +40,8 @@ async def create_app_infra(ticket_id: str, title: str) -> tuple[str, str]:
 
     Returns (repo_full_name, workspace_path).
     """
-    repo_name = _slugify(title)
-    repo_full = f"{GITHUB_ORG}/{repo_name}"
+    branch_name = f"{ticket_id.lower()}-{_slugify(title)}"
+    repo_full = GITHUB_BUILDS_REPO  # Single output repo, branch per ticket
     workspace = WORKSPACE_DIR / ticket_id
     workspace.mkdir(parents=True, exist_ok=True)
 
@@ -56,18 +56,13 @@ async def create_app_infra(ticket_id: str, title: str) -> tuple[str, str]:
         prompt = (
             f"Set up the infrastructure for a new app. Do these steps in order:\n\n"
             f"## 1. Create GitHub repo\n\n"
-            f"Use the GitHub MCP to create a new repository:\n"
-            f"- Owner: `{GITHUB_ORG}`\n"
-            f"- Name: `{repo_name}`\n"
-            f"- Description: `{title} (built by software factory from {ticket_id})`\n"
-            f"- Private: false\n"
-            f"- Auto-init: true (so it has a default branch)\n\n"
-            f"Then clone it: `git clone https://github.com/{repo_full}.git .`\n\n"
-            f"If the repo already exists, just clone it.\n\n"
+            f"Clone the factory-builds repo and create a branch for this ticket:\n"
+            f"- Clone: `git clone https://github.com/{repo_full}.git .`\n"
+            f"- Create branch: `git checkout -b {branch_name}`\n\n"
             f"## 2. Create Vercel project\n\n"
             f"Use the Vercel MCP to create a new project:\n"
-            f"- Name: `{repo_name}`\n"
-            f"- Link it to the GitHub repo `{repo_full}`\n"
+            f"- Name: `factory-builds-{ticket_id.lower()}`\n"
+            f"- Link it to the GitHub repo `{repo_full}` branch `{branch_name}`\n"
             f"- Framework preset: Next.js\n\n"
             f"If the project already exists, skip this step.\n\n"
             f"## 3. Provision Supabase via Vercel Marketplace\n\n"
@@ -92,12 +87,12 @@ async def create_app_infra(ticket_id: str, title: str) -> tuple[str, str]:
         await comment_on_issue(
             issue_info["id"],
             f"⚪ **Infrastructure provisioned:**\n\n"
-            f"- GitHub repo: [`{repo_full}`](https://github.com/{repo_full})\n"
-            f"- Vercel project: `{repo_name}` (linked to repo)\n"
+            f"- GitHub repo: [`{repo_full}`](https://github.com/{repo_full}) branch `{branch_name}`\n"
+            f"- Vercel project: `factory-builds-{ticket_id.lower()}` (linked to repo)\n"
             f"- Supabase: provisioned via Vercel Marketplace (env vars auto-injected)",
         )
 
-    audit_log(ticket_id, "infra_created", repo_full)
+    audit_log(ticket_id, "infra_created", f"{repo_full}@{branch_name}")
     return repo_full, str(workspace)
 
 

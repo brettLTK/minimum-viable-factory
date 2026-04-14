@@ -7,3 +7,5 @@ node_modules/
 workspace/
 audit/
 memory/
+memory/selection-deltas/
+memory/selection-deltas/archive/

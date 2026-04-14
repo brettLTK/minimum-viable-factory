@@ -73,9 +73,11 @@ async def run_agent(
     try:
         from claude_agent_sdk import query as claude_query, ClaudeAgentOptions
 
+        import os
         options = ClaudeAgentOptions(
             cwd=workspace_path,
             permission_mode="bypassPermissions",
+            env={"ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "")},
             allowed_tools=[
                 "Read", "Write", "Edit", "Bash", "Glob", "Grep",
                 "mcp__linear__*", "mcp__github__*",

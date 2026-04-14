@@ -6,7 +6,7 @@ from langgraph.types import interrupt
 from orchestrator.state import FactoryState
 from orchestrator.audit import audit_log
 from orchestrator.memory import append_memory
-from orchestrator.slack import post_slack
+from orchestrator.discord_notify import post_discord as post_slack
 from orchestrator.linear import get_issue_id, comment_on_issue
 
 

@@ -3,7 +3,7 @@
 from orchestrator.config import MEMORY_DIR
 from orchestrator.state import FactoryState
 from orchestrator.audit import audit_log
-from orchestrator.slack import post_slack
+from orchestrator.discord_notify import post_discord as post_slack
 from orchestrator.linear import update_linear_state, get_issue_id, comment_on_issue
 
 

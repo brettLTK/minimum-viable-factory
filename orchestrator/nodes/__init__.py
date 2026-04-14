@@ -10,6 +10,13 @@ from orchestrator.nodes.agents import (
 from orchestrator.nodes.dev import decompose, dev_parallel
 from orchestrator.nodes.gates import gate_1, gate_2, gate_3
 from orchestrator.nodes.terminal import done_handler, blocked_handler
+from orchestrator.nodes.prototype import (
+    prototype_flow_entry,
+    prototype_generator_fanout,
+    prototype_eval_gate,
+    prototype_selection_gate,
+    graduation_trigger,
+)
 
 __all__ = [
     "pm_agent",
@@ -24,4 +31,9 @@ __all__ = [
     "gate_3",
     "done_handler",
     "blocked_handler",
+    "prototype_flow_entry",
+    "prototype_generator_fanout",
+    "prototype_eval_gate",
+    "prototype_selection_gate",
+    "graduation_trigger",
 ]
