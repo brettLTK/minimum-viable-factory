@@ -58,6 +58,11 @@ _ISO 8601 timestamp_
 - `app/path/to/file.tsx` — [what was done]
 ...
 
+### Documentation Gate
+- Build type: [new capability | bug fix | config change | refactor | protocol addition]
+- Artifact: [description and link/path of the artifact produced]
+- Verdict: PASS | FAIL
+
 ### Notes
 [Anything the Review Agent should know — tricky decisions, known limitations]
 ```
@@ -78,6 +83,11 @@ _ISO 8601 timestamp_
 ### Changes
 - `app/path/to/file.tsx` — [what was done]
 ...
+
+### Documentation Gate
+- Build type: [new capability | bug fix | config change | refactor | protocol addition]
+- Artifact: [description and link/path of the artifact produced]
+- Verdict: PASS | FAIL
 
 ### Notes
 [Anything the Review Agent should know — tricky decisions, known limitations]
