@@ -290,3 +290,12 @@ async def update_stage_progress(
         return
     await comment_on_issue(nodes[0]["id"], message)
     audit_log(ticket_id, f"stage_progress:{stage_name}", message[:100])
+
+
+async def get_issue_labels(issue_id: str) -> list[str]:
+    """Get label names applied to a Linear issue by UUID."""
+    data = await _linear_gql(
+        '{ issue(id: "%s") { labels { nodes { name } } } }' % issue_id
+    )
+    nodes = data.get("data", {}).get("issue", {}).get("labels", {}).get("nodes", [])
+    return [n["name"] for n in nodes]
