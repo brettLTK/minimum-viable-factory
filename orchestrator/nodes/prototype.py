@@ -542,32 +542,24 @@ async def prototype_selection_gate(state: FactoryState) -> FactoryState:
         lines.append(f"- `{p['id']}`: branch `{p['repo_branch']}`")
 
     lines.append(
-        "\nApply a label to select the winner: `proto-winner-1`, `proto-winner-2`, `proto-winner-3`, or `proto-archived`."
-        "\nThen move the ticket to any next state to proceed."
+        "\nSet the **Winning Prototype** field to your selection, "
+        "then move the ticket to any next state to proceed."
     )
 
     await comment_on_issue(issue_info["id"], "\n".join(lines))
     audit_log(ticket_id, "prototype_selection_gate:interrupted", "waiting for Brett")
 
     # Interrupt pipeline — resumes on any Linear state transition
-    interrupt({"gate": "prototype_selection_gate", "ticket_id": ticket_id})
+    decision = interrupt({"gate": "prototype_selection_gate", "ticket_id": ticket_id})
 
-    # Read Winning Prototype from Linear labels (Option B — free tier compatible)
-    from orchestrator.linear import get_issue_labels
-    labels = await get_issue_labels(issue_info["id"])
-    proto_winner_labels = [l for l in labels if l.startswith("proto-winner-")]
-    archived_label = "proto-archived" in labels
-
+    # Read Winning Prototype from decision payload (Linear custom field)
     winning_prototype = None
-    if proto_winner_labels:
-        # proto-winner-1 → Proto-1, proto-winner-2 → Proto-2, etc.
-        label = proto_winner_labels[0]
-        n = label.split("-")[-1]  # "1", "2", "3"
-        winning_prototype = f"{ticket_id}-proto-{n}"
-    elif archived_label:
-        winning_prototype = "Archived"
+    if isinstance(decision, dict):
+        winning_prototype = decision.get("winning_prototype") or decision.get("Winning Prototype")
+    elif isinstance(decision, str):
+        winning_prototype = decision
 
-    # Safe default: Archived if no label applied
+    # Safe default: Archived if field is empty
     if not winning_prototype or winning_prototype == "Archived":
         audit_log(ticket_id, "prototype_selection_gate:archived", "no winner selected")
         await comment_on_issue(
